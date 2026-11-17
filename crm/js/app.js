@@ -29,6 +29,10 @@
   let selectedMapRoute = null;
   const INACTIVITY_MS=5*60*1000, DEMO_PASSWORD='DemoRGR2026!', DEMO_SECURITY_KEY='rgr_crm_v10_demo_security';
   let lastActivity=Date.now(), lastHeartbeat=0, securityState=null, waitingForPassword=false, otpSent=false;
+  let unlockTransitionTimer=null;
+  function cancelUnlockTransition(){
+    if(unlockTransitionTimer!==null){clearTimeout(unlockTransitionTimer);unlockTransitionTimer=null;}
+  }
   const isLive = () => currentMode==='live';
   const rows = entity => db[entity] || [];
   const record = (entity,id) => rows(entity).find(r=>Number(r[pk[entity]])===Number(id));
@@ -75,7 +79,7 @@
   function avatarLetters(name='Administrador'){return String(name).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'AD';}
   // No confiamos en sesiones de demostración almacenadas de versiones anteriores.
   sessionStorage.removeItem(SESSION_KEY);localStorage.removeItem(SESSION_KEY);
-  function clearSession(){currentSession=null;currentMode=null;securityState=null;}
+  function clearSession(){cancelUnlockTransition();currentSession=null;currentMode=null;securityState=null;}
   function updateProfileUI(){
     const session=currentSession||{name:'Administrador',role:'RGR Panamá'};
     $('#profileAvatar').textContent=avatarLetters(session.name);
@@ -86,7 +90,8 @@
     if(!isLive())badge.textContent='Demo';
   }
   function showApp(){
-    securityState=null;lastActivity=Date.now();
+    cancelUnlockTransition();
+    securityState=null;lastActivity=Date.now();lastHeartbeat=Date.now();
     $('#securityScreen').hidden=true;
     window.location.hash='#/crm/dashboard';
     $('#loginScreen').hidden=true;$('#app').hidden=false;
@@ -94,7 +99,7 @@
     notifyPortal('ready');
   }
   function showLogin(){
-    securityState=null;$('#securityScreen').hidden=true;$('#securityPrompt').hidden=true;
+    cancelUnlockTransition();securityState=null;$('#securityScreen').hidden=true;$('#securityPrompt').hidden=true;
     window.location.hash='#/login';
     $('#app').hidden=true;$('#loginScreen').hidden=false;
     document.body.classList.add('login-open');$('#loginError').hidden=true;
@@ -109,7 +114,7 @@
   function demoState(){const s=demoSecurityRead();return s.approval_required?'blocked':'active';}
   function enterSecurity(state,message=''){
     if(!currentMode)return;
-    securityState=state;otpSent=false;
+    cancelUnlockTransition();securityState=state;otpSent=false;
     $('#app').hidden=true;$('#loginScreen').hidden=true;$('#securityScreen').hidden=false;
     $('#toastRoot').replaceChildren();
     $('#securityPrompt').hidden=true;waitingForPassword=false;
@@ -117,11 +122,35 @@
     window.location.hash='#/seguridad';renderSecurity(message);
     notifyPortal('ready');
   }
+  // Pantalla de confirmación, presentada solo después de validar la contraseña
+  // y verificar que el servidor ha restaurado la sesión activa.
+  function showUnlockConfirmation(){
+    if(!currentMode)return;
+    cancelUnlockTransition();
+    securityState='unlock_success';
+    lastActivity=Date.now();lastHeartbeat=Date.now();
+    $('#app').hidden=true;$('#loginScreen').hidden=true;$('#securityScreen').hidden=false;
+    window.location.hash='#/seguridad/validada';
+    renderSecurity();
+    // La confirmación se puede omitir con el botón y se cierra automáticamente.
+    unlockTransitionTimer=setTimeout(()=>{
+      unlockTransitionTimer=null;
+      if(currentMode&&securityState==='unlock_success')showApp();
+    },2300);
+  }
   function renderSecurity(message=''){
     const card=$('#securityCard');
     const err=message?`<p class="security-error" role="alert">${escapeHtml(message)}</p>`:'';
     let title='',text='',controls='';
-    if(securityState==='idle_locked'){
+    if(securityState==='unlock_success'){
+      title='Identidad verificada';
+      text='Tu sesión se desbloqueó correctamente. Ya puedes continuar en el CRM.';
+      controls='<div class="security-verified-progress" aria-hidden="true"><span></span></div><button type="button" class="btn btn-primary" id="securityContinue">Continuar al panel</button>';
+    }else if(securityState==='unlock_checking'){
+      title='Validando acceso';
+      text='Estamos verificando tu identidad y restaurando tu sesión de forma segura.';
+      controls='<div class="security-loading-spinner" aria-hidden="true"></div><p class="security-muted" role="status">Comprobando sesión…</p>';
+    }else if(securityState==='idle_locked'){
       title='Sesión bloqueada';text='Pasaron 5 minutos sin actividad. Confirma tu contraseña para continuar.';
       controls=`<form id="securityUnlockForm"><label for="securityUnlockPassword">Contraseña</label><input id="securityUnlockPassword" type="password" autocomplete="current-password" required autofocus/><button class="btn btn-primary" type="submit">Desbloquear sesión</button></form>`;
     }else if(securityState==='blocked'){
@@ -139,22 +168,43 @@
       title='Acceso restringido';text='No se pudo verificar tu sesión de forma segura.';
       controls='<button class="btn btn-primary" type="button" id="checkSecurityStatus">Reintentar verificación</button>';
     }
-    card.innerHTML=`<div class="security-mark">${icon('shield')}</div><h1 id="securityTitle">${title}</h1><p>${text}</p>${err}${controls}<button class="security-secondary" type="button" id="securityExit">Cerrar sesión</button>`;
+    const isVerifying=securityState==='unlock_checking';
+    const isSuccess=securityState==='unlock_success';
+    card.classList.toggle('security-card-verified',isSuccess);
+    card.innerHTML=`<div class="security-mark ${isSuccess?'security-mark-verified':''}">${icon('shield')}</div><h1 id="securityTitle">${title}</h1><p>${text}</p>${err}${controls}${isSuccess||isVerifying?'':'<button class="security-secondary" type="button" id="securityExit">Cerrar sesión</button>'}`;
     const first=card.querySelector('input');if(first)setTimeout(()=>first.focus(),20);
   }
   async function refreshSecurity(){if(!isLive())return;
     try{const state=await REMOTE.status();
-      if(state.state==='active'){await fetchLive();showApp();toast('Sesión validada.');}
+      if(state.state==='active'){securityState='unlock_checking';renderSecurity();await fetchLive();showUnlockConfirmation();}
       else{securityState=state.state;renderSecurity();}
     }catch(err){renderSecurity(err.message);}}
   async function unlockSecurity(password){
+    if(securityState!=='idle_locked')return;
+    securityState='unlock_checking';renderSecurity();
     if(currentMode==='demo'){
-      const s=demoSecurityRead();if(s.approval_required){securityState='blocked';renderSecurity();return;}
-      if(password!==DEMO_PASSWORD){const result=demoFailure();if(result.state==='blocked')enterSecurity('blocked');else renderSecurity(`Contraseña incorrecta. Te quedan ${result.remaining} intentos.`);return;}
-      demoSecurityWrite({failures:0});showApp();return;
+      const s=demoSecurityRead();if(s.approval_required){enterSecurity('blocked');return;}
+      if(password!==DEMO_PASSWORD){
+        const result=demoFailure();
+        if(result.state==='blocked')enterSecurity('blocked');
+        else{securityState='idle_locked';renderSecurity(`Contraseña incorrecta. Te quedan ${result.remaining} intentos.`);}
+        return;
+      }
+      demoSecurityWrite({failures:0});showUnlockConfirmation();return;
     }
-    try{await REMOTE.unlock(password);await fetchLive();showApp();}
-    catch(err){if(err.state==='blocked')enterSecurity('blocked');else renderSecurity(err.remaining!==undefined?`Contraseña incorrecta. Intentos disponibles: ${err.remaining}.`:err.message);}
+    let accepted=false;
+    try{
+      await REMOTE.unlock(password);
+      accepted=true;
+      const status=await REMOTE.status();
+      if(status.state!=='active'){enterSecurity(status.state||'unavailable');return;}
+      await fetchLive();
+      showUnlockConfirmation();
+    }catch(err){
+      if(err.state==='blocked'){enterSecurity('blocked');return;}
+      securityState=accepted?'unavailable':'idle_locked';
+      renderSecurity(accepted?'No se pudo recuperar el panel. Reintenta la comprobación de sesión.':(err.remaining!==undefined?`Contraseña incorrecta. Intentos disponibles: ${err.remaining}.`:err.message));
+    }
   }
   function passwordPrompt(){
     return new Promise(resolve=>{
@@ -616,6 +666,7 @@
   setInterval(()=>{if(currentMode&&!securityState&&!$('#app').hidden&&Date.now()-lastActivity>=INACTIVITY_MS)enterSecurity('idle_locked');},1000);
   $('#securityPromptForm').addEventListener('invalid',()=>{},true);
   $('#securityScreen').addEventListener('click',async e=>{
+    if(e.target.closest('#securityContinue')&&securityState==='unlock_success'){showApp();return;}
     if(e.target.closest('#securityExit')){await exitCRM();return;}
     if(e.target.closest('#checkSecurityStatus')){await refreshSecurity();return;}
     if(e.target.closest('#demoResetSecurity')&&currentMode==='demo'){demoSecurityWrite({failures:0});securityState='idle_locked';renderSecurity();return;}
@@ -634,8 +685,8 @@
     }
     if(form.id==='securityRecoveryForm'){
       const password=$('#securityRecoveryPassword').value;$('#securityRecoveryPassword').value='';
-      try{await REMOTE.finishRecovery(password);await fetchLive();showApp();}
-      catch(err){if(err.state==='blocked')enterSecurity('blocked');else renderSecurity(err.message);}
+      try{securityState='unlock_checking';renderSecurity();await REMOTE.finishRecovery(password);await fetchLive();showUnlockConfirmation();}
+      catch(err){if(err.state==='blocked')enterSecurity('blocked');else{securityState='recovery_password';renderSecurity(err.message);}}
     }
   });
   $('#fillDemoLogin').addEventListener('click',openDemo);

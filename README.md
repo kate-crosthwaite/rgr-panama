@@ -1,4 +1,4 @@
-# RGR Panamá Web v22 — Panel único CRM + ERP
+# RGR Panamá Web v23 — Panel único CRM + ERP
 
 El `index.html` principal es el **único punto de entrada y login**. Tras autenticarse en Supabase, el sistema selecciona el área autorizada y abre su panel en la misma pestaña y URL, sin mostrar un segundo formulario ni cambiar visualmente entre aplicaciones durante la carga.
 
@@ -15,3 +15,6 @@ Abrir el proyecto completo en VS Code y ejecutar **solamente el `index.html` de 
 Publicar todo el contenido de la carpeta en la raíz del repositorio, o mantenerlo en una carpeta contenedora y utilizar su ruta exacta. No se requieren SQL ni despliegues adicionales de `crm-security` por este cambio visual.
 
 La carpeta `crm` y la carpeta `erp` permanecen separadas **internamente**, para conservar la lógica de sus formularios, controles y mapas. El usuario ve un solo panel en la URL principal.
+
+### Desbloqueo de seguridad (v23)
+Tras comprobar la contraseña y el estado de sesión activo en Supabase, el CRM muestra una pantalla «Identidad verificada» durante aproximadamente 2 segundos antes de regresar al panel. El temporizador de inactividad se reinicia al confirmar y al volver al dashboard. La pantalla no altera los permisos, el ERP ni la Edge Function, y no requiere ejecutar SQL.

@@ -23,3 +23,16 @@
   padding: 0 !important;
 }
 .auth-brand-logo { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+
+/* v23 — Verificación correcta después del desbloqueo */
+.security-card-verified{background:rgba(255,255,255,.83);border-color:rgba(188,235,203,.94)}
+.security-mark-verified{color:#fff;background:linear-gradient(135deg,#178a47,#25b662);border-color:transparent;box-shadow:0 12px 28px #208c4830;animation:rgr-verify-pop .48s ease-out both}
+.security-verified-progress{width:100%;height:5px;margin:22px 0 10px;background:#dceee2;border-radius:99px;overflow:hidden}
+.security-verified-progress span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#188b45,#65c887);transform-origin:left;animation:rgr-verify-fill 2.3s linear forwards}
+.security-card-verified #securityContinue{margin-top:10px}
+.security-loading-spinner{width:27px;height:27px;margin:10px auto;border:3px solid #dceee2;border-top-color:#198d48;border-radius:50%;animation:rgr-verify-spin .8s linear infinite}
+@keyframes rgr-verify-spin{to{transform:rotate(360deg)}}
+@keyframes rgr-verify-pop{from{opacity:.3;transform:scale(.87)}to{opacity:1;transform:scale(1)}}
+@keyframes rgr-verify-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media(prefers-reduced-motion:reduce){.security-mark-verified,.security-verified-progress span,.security-loading-spinner{animation:none!important}}
