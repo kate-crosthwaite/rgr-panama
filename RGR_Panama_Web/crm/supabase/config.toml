@@ -1,5 +1,0 @@
-# La plataforma no valida el JWT; crm-security identifica a cada usuario
-# en el servidor con auth.getUser(token) antes de cualquier acción.
-# Configuración compatible con JWT asimétricos.
-[functions.crm-security]
-verify_jwt = false
