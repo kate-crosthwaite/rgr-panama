@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script>if(window.parent!==window)document.documentElement.classList.add('rgr-embedded');</script>
+  <style>html.rgr-embedded #loginScreen{display:none!important}</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#16452B" />
+  <meta name="description" content="CRM administrativo RGR Panamá — acceso Supabase y panel de gestión" />
+  <title>RGR Panamá | CRM Administrador</title>
+  <link rel="icon" type="image/png" href="assets/logo-app-rgr.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/apple-refinements.css" />
+  <link rel="stylesheet" href="css/security.css" />
+  <link rel="stylesheet" href="../css/rgr-routes-map.css" />
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.35.0/mapbox-gl.css" />
+</head>
+<body>
+  <div id="loginScreen" class="auth-shell">
+    <div class="auth-panel auth-hero">
+      <div class="auth-hero-top">
+        <div class="auth-brand">
+          <img src="assets/logo-app-rgr.png" alt="RGR Panamá" class="auth-brand-logo" />
+          <div>
+            <b>RGR Panamá</b>
+            <span>Centro de administración</span>
+          </div>
+        </div>
+        <span class="auth-chip">CRM ADMINISTRATIVO</span>
+      </div>
+      <div class="auth-hero-copy">
+        <p class="auth-kicker">Acceso seguro</p>
+        <h1>Controla rutas, incidencias, usuarios y flota desde un solo lugar.</h1>
+        <p class="auth-text">Accede al panel administrativo de RGR Panamá y gestiona toda la operación desde un solo lugar.</p>
+        <div class="auth-feature-grid">
+          <article><strong>Panel general</strong><span>Información y actividad del servicio en un solo lugar.</span></article>
+          <article><strong>Gestión centralizada</strong><span>Rutas, horarios, incidencias, personal y recursos.</span></article>
+          <article><strong>Acceso administrativo</strong><span>Ingreso exclusivo para personal autorizado.</span></article>
+        </div>
+      </div>
+      <div class="auth-hero-bottom">
+        <div class="auth-stat"><b>13</b><span>módulos administrativos</span></div>
+        <div class="auth-stat"><b>24/7</b><span>gestión digital</span></div>
+        <div class="auth-stat"><b>RGR</b><span>Panamá</span></div>
+      </div>
+    </div>
+    <div class="auth-panel auth-card-panel">
+      <form id="loginForm" class="auth-card" autocomplete="off">
+        <div class="auth-card-head">
+          <span class="auth-card-icon"><img src="assets/logo-app-rgr.png" alt="Logo de RGR Panamá" /></span>
+          <div>
+            <p class="auth-card-eyebrow">Bienvenida</p>
+            <h2>Iniciar sesión</h2>
+            <small>Ingresa con tu cuenta de administrador</small>
+          </div>
+        </div>
+        <label class="auth-field">
+          <span>Correo corporativo</span>
+          <input type="email" id="loginEmail" placeholder="Tu correo de RGR Panamá" autocomplete="username" required />
+        </label>
+        <label class="auth-field">
+          <span>Contraseña</span>
+          <input type="password" id="loginPassword" placeholder="Tu contraseña" autocomplete="current-password" required />
+        </label>
+        <div class="auth-inline">
+          <span class="auth-session-note">Solo personal autorizado</span>
+          <button type="button" id="fillDemoLogin" class="auth-link">Explorar demo</button>
+        </div>
+        <button type="submit" class="auth-submit">Iniciar sesión</button>
+        <p class="auth-demo-note">Utiliza tus credenciales de RGR Panamá.</p>
+        <p id="loginError" class="auth-error" role="alert" hidden>No se pudo iniciar sesión.</p>
+      </form>
+    </div>
+  </div>
+  <section class="security-screen" id="securityScreen" hidden aria-labelledby="securityTitle">
+    <div class="security-ambient security-ambient-a"></div><div class="security-ambient security-ambient-b"></div>
+    <div class="security-shell">
+      <header class="security-brand"><img src="assets/logo-app-rgr.png" alt="Logo RGR Panamá" />
+        <div><strong>RGR Panamá</strong><span>Seguridad administrativa</span></div></header>
+      <div class="security-card" id="securityCard"></div>
+      <p class="security-footer">Acceso exclusivo para personal autorizado</p>
+    </div>
+  </section>
+  <div class="security-prompt" id="securityPrompt" hidden>
+    <form id="securityPromptForm" class="security-prompt-card">
+      <div class="security-mark"><svg class="icon"><use href="#i-shield" /></svg></div>
+      <h2>Confirma tu contraseña</h2>
+      <p>Esta operación requiere una verificación de identidad.</p>
+      <label for="securityPromptPassword">Contraseña actual</label>
+      <input type="password" id="securityPromptPassword" autocomplete="current-password" required />
+      <p id="securityPromptError" class="security-error" hidden></p>
+      <div class="security-actions">
+        <button type="button" id="securityPromptCancel" class="btn btn-light">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Confirmar operación</button>
+      </div>
+    </form>
+  </div>
+  <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M6 16V9a3 3 0 0 1 3-3h7M18 8v7a3 3 0 0 1-3 3H8"/></symbol>
+    <symbol id="i-route-menu" viewBox="0 0 24 24"><circle cx="17.7" cy="5.6" r="2.15"/><circle cx="6.4" cy="18.1" r="2.15"/><path d="M15.5 5.6H11a3.8 3.8 0 0 0-3.8 3.8v5.1M8.6 18.1h5.1a3.8 3.8 0 0 0 3.8-3.8V9.1"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 14h3M8 17h3"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h12v12H2zM14 10h4l4 4v4h-8"/><circle cx="6.5" cy="18.5" r="2"/><circle cx="18" cy="18.5" r="2"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2H3ZM17 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5v1h-3"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h17M8 15l4-5 4 2 5-7"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.5-2.3.9a8 8 0 0 0-2.1-1.2L14 3h-4l-.5 2.5a8 8 0 0 0-2.1 1.2l-2.3-.9-2 3.5 2 1.5a7 7 0 0 0 0 2.4l-2 1.5 2 3.5 2.3-.9a8 8 0 0 0 2.1 1.2L10 21h4l.5-2.5a8 8 0 0 0 2.1-1.2l2.3.9 2-3.5-2-1.5a7 7 0 0 0 .1-1.2z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M2 12h4l3-7 5 14 3-7h5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 6 4 9 9 10 5-1 9-4 9-10V6z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="m15 5 4 4M10 14l8.7-8.7a2.1 2.1 0 0 1 3 3L13 17l-5 1z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6M10 10v7M14 10v7"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 2v14m-5-5 5 5 5-5M4 17v4h16v-4"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V2m-5 5 5-5 5 5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 6v5h-5M4 18v-5h5"/><path d="M5.5 9A7 7 0 0 1 18 6l2 5M4 13l2 5A7 7 0 0 0 18.5 15"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 17l9 5 9-5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M5 2h9l5 5v15H5zM14 2v5h5M8 12h8M8 16h8"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></symbol>
+  </svg>
+  <div class="layout" id="app" hidden>
+    <aside id="sidebar" class="sidebar">
+      <div class="brand-block"><span class="brand-icon"><img class="sidebar-brand-logo" src="assets/logo-app-rgr.png" alt="Logo de RGR Panamá" /></span><span class="brand-word">RGR <b>Panamá</b><small>ADMINISTRACIÓN</small></span></div>
+      <div class="nav-label">VISIÓN GENERAL</div>
+      <nav class="nav-list" aria-label="Módulos administrativos">
+        <button class="nav-btn active" data-page="resumen"><svg class="icon"><use href="#i-grid"/></svg><span>Dashboard</span></button>
+        <button class="nav-btn" data-page="rutas"><svg class="icon route-nav-icon" aria-hidden="true"><use href="#i-route-menu"/></svg><span>Rutas</span></button>
+        <button class="nav-btn" data-page="mapa"><svg class="icon"><use href="#i-map"/></svg><span>Mapa de recorridos</span></button>
+        <button class="nav-btn" data-page="horarios"><svg class="icon"><use href="#i-calendar"/></svg><span>Horarios</span></button>
+        <button class="nav-btn" data-page="incidencias"><svg class="icon"><use href="#i-alert"/></svg><span>Incidencias</span><span class="nav-badge" id="incidenceCount">0</span></button>
+        <button class="nav-btn" data-page="coordenadas"><svg class="icon"><use href="#i-map"/></svg><span>Puntos de recorrido</span></button>
+      </nav>
+      <div class="nav-label">ADMINISTRACIÓN</div>
+      <nav class="nav-list" aria-label="Usuarios y recursos">
+        <button class="nav-btn" data-page="usuarios"><svg class="icon"><use href="#i-users"/></svg><span>Usuarios</span></button>
+        <button class="nav-btn" data-page="operadores"><svg class="icon"><use href="#i-user"/></svg><span>Operadores</span></button>
+        <button class="nav-btn" data-page="roles"><svg class="icon"><use href="#i-shield"/></svg><span>Roles y permisos</span></button>
+        <button class="nav-btn" data-page="conductores"><svg class="icon"><use href="#i-user"/></svg><span>Conductores</span></button>
+        <button class="nav-btn" data-page="camiones"><svg class="icon"><use href="#i-truck"/></svg><span>Flota de camiones</span></button>
+        <button class="nav-btn" data-page="ubicaciones"><svg class="icon"><use href="#i-pin"/></svg><span>Ubicaciones</span></button>
+      </nav>
+      <div class="nav-label">HERRAMIENTAS</div>
+      <nav class="nav-list" aria-label="Herramientas">
+        <button class="nav-btn" data-page="reportes"><svg class="icon"><use href="#i-chart"/></svg><span>Reportes</span></button>
+        <button class="nav-btn" data-page="perfil"><svg class="icon"><use href="#i-settings"/></svg><span>Perfil y datos</span></button>
+      </nav>
+      
+    </aside>
+    <div class="mobile-shade" id="mobileShade" hidden></div>
+    <div class="content-area">
+      <header class="topbar"><div class="topbar-left"><button type="button" id="mobileMenu" class="icon-square mobile-trigger" aria-label="Abrir menú"><svg class="icon"><use href="#i-menu"/></svg></button><img class="topbar-logo" src="assets/logo-app-rgr.png" alt="" aria-hidden="true" /><span class="breadcrumb">Área administrativa <em>/</em> <strong id="currentCrumb">Dashboard</strong></span></div><div class="topbar-right"><label class="top-search"><svg class="icon"><use href="#i-search"/></svg><input type="search" id="globalSearch" placeholder="Buscar en este módulo..." aria-label="Buscar" /></label><span class="top-demo demo-badge" id="connectionBadge" hidden>Demo</span><div class="top-separator"></div><button class="admin-profile" id="profileBtn" title="Ver perfil" type="button"><span class="avatar" id="profileAvatar">AD</span><span class="profile-copy"><b id="profileName">Administrador</b><small id="profileRole">RGR Panamá</small></span><svg class="icon tiny"><use href="#i-chevron"/></svg></button><button class="btn btn-light btn-sm" id="logoutBtn" type="button">Salir</button></div></header>
+      
+      <main id="pageContent" class="page-container" tabindex="-1"></main>
+      <footer class="footer">© 2026 RGR Panamá <span>CRM Administrativo</span></footer>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="modalRoot" hidden></div>
+  <div class="toast-stack" id="toastRoot" aria-live="polite"></div>
+  <input type="file" id="importFile" accept="application/json,.json" hidden />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.35.0/mapbox-gl.js"></script>
+  <script src="../js/map-config.js"></script>
+  <script src="../js/rgr-routes-map.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="js/supabase_bridge.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

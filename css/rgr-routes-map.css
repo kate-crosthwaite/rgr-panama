@@ -1,0 +1,21 @@
+/* Mapa compartido: diseño Apple Glass y proporciones legibles. */
+.rgr-street-map{position:relative;width:100%;height:100%;min-height:380px;overflow:hidden;border-radius:16px;background:#eaf4ed}
+.rgr-map-message{position:absolute;z-index:3;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:22px;background:linear-gradient(140deg,#eaf6ee,#f8fdf9);color:#41644c;font-size:14px;line-height:1.5;font-weight:600}
+.rgr-map-legend{display:flex;align-items:center;gap:15px;flex-wrap:wrap;color:#486e57;font-size:13px;margin-top:12px}
+.rgr-map-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:middle;border:2px solid white;box-shadow:0 0 0 1px #cbdfd1}
+.rgr-map-legend .start{background:#20A84A}.rgr-map-legend .end{background:#e65858}
+.rgr-map-caption{color:#678478;font-size:12px;line-height:1.6}
+.rgr-map-select{width:100%;max-width:360px;border:1px solid #cee1d2;border-radius:12px;padding:11px 13px;background:#fff;color:#16452b;font-size:14px}
+.rgr-map-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.rgr-map-layout{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(250px,.72fr);gap:18px}
+.rgr-map-route-list{display:grid;gap:8px;align-content:start;max-height:580px;overflow:auto}
+.rgr-map-route-list button{width:100%;border:1px solid #dce9e0;border-radius:13px;background:rgba(255,255,255,.82);padding:13px;color:#16452b;text-align:left;display:grid;gap:4px}
+.rgr-map-route-list button.selected{background:#e9f7ed;border-color:#20A84A}
+.rgr-map-route-list small{font-size:12px;color:#6b8073}
+.rgr-map-main{min-height:530px;height:60vh;max-height:720px}
+.rgr-map-main>.rgr-street-map{height:100%;min-height:530px}
+.rgr-dashboard-map{min-height:390px;height:390px;border-radius:17px}
+.rgr-dashboard-map>.rgr-street-map{min-height:390px;height:100%}
+.mapboxgl-map,.maplibregl-map{font:inherit}
+@media(max-width:980px){.rgr-map-layout{grid-template-columns:1fr}.rgr-map-route-list{max-height:220px}.rgr-map-main{height:480px;min-height:480px}.rgr-map-main>.rgr-street-map{min-height:480px}}
+@media(max-width:600px){.rgr-dashboard-map,.rgr-dashboard-map>.rgr-street-map{height:330px;min-height:330px}.rgr-map-main,.rgr-map-main>.rgr-street-map{height:390px;min-height:390px}}
